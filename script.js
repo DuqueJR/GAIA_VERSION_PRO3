@@ -88,6 +88,12 @@ function initializeApp() {
     // Event listener para estadísticas
     document.getElementById('statsBtn').addEventListener('click', toggleStats);
     
+    // Event listener para análisis de calidad del aire
+    document.getElementById('airQualityBtn').addEventListener('click', toggleAirQualityAnalysis);
+    
+    // Event listener para actualizar análisis de calidad del aire
+    document.getElementById('updateQualityBtn').addEventListener('click', updateAirQualityAnalysis);
+    
     console.log('✅ Aplicación inicializada correctamente');
 }
 
@@ -169,6 +175,11 @@ function processFile(file) {
             // Mostrar secciones adicionales
             showChartSection();
             showStatsSection();
+            
+            // Mostrar sección de calidad del aire si está disponible
+            if (csvHeaders.includes('Resistencia_kOhms')) {
+                showAirQualitySection();
+            }
         },
         error: function(error) {
             console.error('❌ Error al procesar el CSV:', error);
@@ -468,6 +479,13 @@ function showStatsSection() {
 }
 
 /**
+ * Muestra la sección de análisis de calidad del aire
+ */
+function showAirQualitySection() {
+    document.getElementById('airQualitySection').style.display = 'block';
+}
+
+/**
  * Actualiza la descripción de la gráfica
  */
 function updateChartDescription(xAxis, yAxis, chartType, dataPoints) {
@@ -578,5 +596,375 @@ window.GAIACANSAT = {
     calculateStats,
     formatNumber
 };
+
+// Métricas de calidad del aire basadas en resistencia de gases
+const airQualityMetrics = {
+    excellent: { min: 300, max: Infinity, label: 'Excelente', color: '#00ff88' },
+    good: { min: 200, max: 300, label: 'Buena', color: '#33ff99' },
+    moderate: { min: 100, max: 200, label: 'Moderada', color: '#ffaa00' },
+    poor: { min: 50, max: 100, label: 'Mala', color: '#ff6600' },
+    veryPoor: { min: 0, max: 50, label: 'Muy mala', color: '#ff0000' }
+};
+
+/**
+ * Alterna la visualización del análisis de calidad del aire
+ */
+function toggleAirQualityAnalysis() {
+    const airQualityBtn = document.getElementById('airQualityBtn');
+    const airQualityContent = document.getElementById('airQualityContent');
+    
+    if (airQualityContent.style.display === 'none') {
+        // Mostrar análisis de calidad del aire
+        generateAirQualityAnalysis();
+        airQualityContent.style.display = 'block';
+        airQualityBtn.textContent = 'Ocultar Análisis';
+        airQualityBtn.classList.add('active');
+    } else {
+        // Ocultar análisis de calidad del aire
+        airQualityContent.style.display = 'none';
+        airQualityBtn.textContent = 'Analizar Calidad del Aire';
+        airQualityBtn.classList.remove('active');
+    }
+}
+
+/**
+ * Actualiza el análisis de calidad del aire con el intervalo seleccionado
+ */
+function updateAirQualityAnalysis() {
+    if (!csvData || !csvHeaders.includes('Resistencia_kOhms')) {
+        alert('❌ No se encontró la variable Resistencia_kOhms en los datos');
+        return;
+    }
+    
+    console.log('🔄 Actualizando análisis de calidad del aire...');
+    
+    // Obtener datos de resistencia
+    const resistanceData = csvData.map(row => parseFloat(row['Resistencia_kOhms'])).filter(val => !isNaN(val));
+    
+    // Procesar datos según el intervalo seleccionado
+    const interval = document.getElementById('altitudeInterval').value;
+    const processedData = processAltitudeData(resistanceData, interval);
+    
+    // Clasificar datos por calidad del aire
+    const qualityAnalysis = classifyAirQuality(processedData.map(d => d.resistance));
+    
+    // Generar resumen
+    generateQualityOverview(qualityAnalysis);
+    
+    // Generar gráfica de perfil vertical
+    generateQualityChart(resistanceData);
+    
+    // Generar métricas detalladas
+    generateQualityMetrics(qualityAnalysis, processedData.map(d => d.resistance));
+}
+
+/**
+ * Genera el análisis completo de calidad del aire
+ */
+function generateAirQualityAnalysis() {
+    if (!csvData || !csvHeaders.includes('Resistencia_kOhms')) {
+        alert('❌ No se encontró la variable Resistencia_kOhms en los datos');
+        return;
+    }
+    
+    console.log('🌬️ Generando análisis de calidad del aire...');
+    
+    // Obtener datos de resistencia
+    const resistanceData = csvData.map(row => parseFloat(row['Resistencia_kOhms'])).filter(val => !isNaN(val));
+    
+    // Clasificar datos por calidad del aire
+    const qualityAnalysis = classifyAirQuality(resistanceData);
+    
+    // Generar resumen
+    generateQualityOverview(qualityAnalysis);
+    
+    // Generar gráfica de perfil vertical
+    generateQualityChart(resistanceData);
+    
+    // Generar métricas detalladas
+    generateQualityMetrics(qualityAnalysis, resistanceData);
+}
+
+/**
+ * Clasifica los datos de resistencia según la calidad del aire
+ */
+function classifyAirQuality(resistanceData) {
+    const classification = {
+        excellent: [],
+        good: [],
+        moderate: [],
+        poor: [],
+        veryPoor: []
+    };
+    
+    resistanceData.forEach(value => {
+        if (value >= 300) {
+            classification.excellent.push(value);
+        } else if (value >= 200) {
+            classification.good.push(value);
+        } else if (value >= 100) {
+            classification.moderate.push(value);
+        } else if (value >= 50) {
+            classification.poor.push(value);
+        } else {
+            classification.veryPoor.push(value);
+        }
+    });
+    
+    return classification;
+}
+
+/**
+ * Genera el resumen de calidad del aire
+ */
+function generateQualityOverview(qualityAnalysis) {
+    const overview = document.getElementById('qualityOverview');
+    const totalData = Object.values(qualityAnalysis).reduce((sum, arr) => sum + arr.length, 0);
+    
+    overview.innerHTML = '';
+    
+    Object.keys(airQualityMetrics).forEach(key => {
+        const metric = airQualityMetrics[key];
+        const data = qualityAnalysis[key];
+        const percentage = totalData > 0 ? ((data.length / totalData) * 100).toFixed(1) : 0;
+        
+        const card = document.createElement('div');
+        card.className = `quality-card ${key}`;
+        card.innerHTML = `
+            <div class="quality-title">${metric.label}</div>
+            <div class="quality-value">${data.length}</div>
+            <div class="quality-percentage">${percentage}% del vuelo</div>
+        `;
+        
+        overview.appendChild(card);
+    });
+}
+
+/**
+ * Genera la gráfica de perfil vertical de calidad del aire
+ */
+function generateQualityChart(resistanceData) {
+    const interval = document.getElementById('altitudeInterval').value;
+    const processedData = processAltitudeData(resistanceData, interval);
+    
+    // Crear colores individuales para cada punto según su calidad
+    const colors = processedData.map(point => {
+        if (point.resistance >= 300) return '#00ff88';      // Excelente - Verde neón brillante
+        if (point.resistance >= 200) return '#33ff99';      // Buena - Verde claro más distinguible
+        if (point.resistance >= 100) return '#ffaa00';     // Moderada - Naranja
+        if (point.resistance >= 50) return '#ff6600';       // Mala - Naranja oscuro
+        return '#ff0000';                                    // Muy mala - Rojo
+    });
+    
+    // Crear texto de hover con información detallada
+    const hoverText = processedData.map(point => {
+        let quality = '';
+        if (point.resistance >= 300) quality = 'Excelente';
+        else if (point.resistance >= 200) quality = 'Buena';
+        else if (point.resistance >= 100) quality = 'Moderada';
+        else if (point.resistance >= 50) quality = 'Mala';
+        else quality = 'Muy mala';
+        
+        return `Altitud: ${point.altitude.toFixed(1)}m<br>Resistencia: ${point.resistance.toFixed(2)}kΩ<br>Calidad: ${quality}`;
+    });
+    
+    // Crear una sola traza con todos los puntos coloreados individualmente
+    const trace = {
+        x: processedData.map(d => d.altitude),
+        y: processedData.map(d => d.resistance),
+        mode: 'markers',
+        type: 'scatter',
+        name: 'Calidad del Aire',
+        marker: {
+            color: colors,
+            size: 12,
+            opacity: 0.8,
+            line: {
+                color: '#ffffff',
+                width: 1
+            }
+        },
+        hovertemplate: '%{text}<extra></extra>',
+        text: hoverText
+    };
+    
+    const layout = {
+        title: {
+            text: `Perfil Vertical de Calidad del Aire ${interval === 'all' ? '(Todas las lecturas)' : `(Promedio cada ${interval}m)`}`,
+            font: {
+                family: 'Orbitron, monospace',
+                size: 18,
+                color: '#00ff88'
+            },
+            x: 0.5,
+            xanchor: 'center'
+        },
+        xaxis: {
+            title: {
+                text: 'Altitud (m)',
+                font: {
+                    family: 'Roboto, sans-serif',
+                    size: 14,
+                    color: '#ffffff'
+                }
+            },
+            gridcolor: '#2a2a2a',
+            color: '#ffffff',
+            tickfont: { color: '#ffffff' },
+            showline: true,
+            linecolor: '#00ff88',
+            linewidth: 2
+        },
+        yaxis: {
+            title: {
+                text: 'Resistencia (kΩ)',
+                font: {
+                    family: 'Roboto, sans-serif',
+                    size: 14,
+                    color: '#ffffff'
+                }
+            },
+            gridcolor: '#2a2a2a',
+            color: '#ffffff',
+            tickfont: { color: '#ffffff' },
+            showline: true,
+            linecolor: '#00ff88',
+            linewidth: 2
+        },
+        plot_bgcolor: '#0a0a0a',
+        paper_bgcolor: '#0a0a0a',
+        font: { family: 'Roboto, sans-serif', color: '#ffffff' },
+        margin: { l: 60, r: 20, t: 100, b: 60 },
+        hovermode: 'closest',
+        showlegend: true,
+        legend: {
+            x: 0.5,
+            y: 1.01,
+            xanchor: 'center',
+            yanchor: 'bottom',
+            orientation: 'h',
+            bgcolor: 'rgba(0,0,0,0.5)',
+            bordercolor: '#00ff88',
+            borderwidth: 1,
+            font: { color: '#ffffff', size: 12 }
+        },
+        annotations: [
+            {
+                x: 0.02,
+                y: 0.98,
+                xref: 'paper',
+                yref: 'paper',
+                text: '🟢 Excelente (>300kΩ) 🟢 Buena (200-300kΩ) 🟠 Moderada (100-200kΩ) 🔶 Mala (50-100kΩ) 🔴 Muy mala (<50kΩ)',
+                showarrow: false,
+                font: { color: '#ffffff', size: 10 },
+                bgcolor: 'rgba(0,0,0,0.7)',
+                bordercolor: '#00ff88',
+                borderwidth: 1,
+                borderpad: 4
+            }
+        ]
+    };
+    
+    const config = {
+        responsive: true,
+        displayModeBar: true,
+        modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+        displaylogo: false
+    };
+    
+    Plotly.newPlot('qualityChart', [trace], layout, config);
+}
+
+/**
+ * Procesa los datos de altitud según el intervalo seleccionado
+ */
+function processAltitudeData(resistanceData, interval) {
+    if (interval === 'all') {
+        // Usar todas las lecturas
+        const altitudeData = csvHeaders.includes('Altitud_m') 
+            ? csvData.map(row => parseFloat(row['Altitud_m'])).filter(val => !isNaN(val))
+            : Array(resistanceData.length).fill(0);
+        
+        return resistanceData.map((resistance, index) => ({
+            altitude: altitudeData[index] || index,
+            resistance: resistance
+        }));
+    } else {
+        // Calcular promedios por intervalos de altitud
+        const intervalSize = parseInt(interval);
+        const altitudeData = csvHeaders.includes('Altitud_m') 
+            ? csvData.map(row => parseFloat(row['Altitud_m'])).filter(val => !isNaN(val))
+            : Array(resistanceData.length).fill(0);
+        
+        // Crear grupos por intervalos de altitud
+        const groups = {};
+        resistanceData.forEach((resistance, index) => {
+            const altitude = altitudeData[index] || index;
+            const groupKey = Math.floor(altitude / intervalSize) * intervalSize;
+            
+            if (!groups[groupKey]) {
+                groups[groupKey] = [];
+            }
+            groups[groupKey].push({ altitude, resistance });
+        });
+        
+        // Calcular promedios para cada grupo
+        const processedData = [];
+        Object.keys(groups).forEach(groupKey => {
+            const group = groups[groupKey];
+            const avgAltitude = group.reduce((sum, point) => sum + point.altitude, 0) / group.length;
+            const avgResistance = group.reduce((sum, point) => sum + point.resistance, 0) / group.length;
+            
+            processedData.push({
+                altitude: avgAltitude,
+                resistance: avgResistance,
+                count: group.length
+            });
+        });
+        
+        return processedData.sort((a, b) => a.altitude - b.altitude);
+    }
+}
+
+/**
+ * Genera métricas detalladas de calidad del aire
+ */
+function generateQualityMetrics(qualityAnalysis, resistanceData) {
+    const metrics = document.getElementById('qualityMetrics');
+    const totalData = resistanceData.length;
+    
+    // Calcular estadísticas generales
+    const avgResistance = resistanceData.reduce((sum, val) => sum + val, 0) / totalData;
+    const maxResistance = Math.max(...resistanceData);
+    const minResistance = Math.min(...resistanceData);
+    
+    // Determinar calidad predominante
+    const predominantQuality = Object.keys(qualityAnalysis).reduce((a, b) => 
+        qualityAnalysis[a].length > qualityAnalysis[b].length ? a : b
+    );
+    
+    metrics.innerHTML = `
+        <div class="quality-metric-card">
+            <div class="quality-metric-title">Resistencia Promedio</div>
+            <div class="quality-metric-value">${avgResistance.toFixed(2)} kΩ</div>
+            <div class="quality-metric-description">Valor promedio durante el vuelo</div>
+        </div>
+        <div class="quality-metric-card">
+            <div class="quality-metric-title">Resistencia Máxima</div>
+            <div class="quality-metric-value">${maxResistance.toFixed(2)} kΩ</div>
+            <div class="quality-metric-description">Mejor calidad registrada</div>
+        </div>
+        <div class="quality-metric-card">
+            <div class="quality-metric-title">Resistencia Mínima</div>
+            <div class="quality-metric-value">${minResistance.toFixed(2)} kΩ</div>
+            <div class="quality-metric-description">Peor calidad registrada</div>
+        </div>
+        <div class="quality-metric-card">
+            <div class="quality-metric-title">Calidad Predominante</div>
+            <div class="quality-metric-value">${airQualityMetrics[predominantQuality].label}</div>
+            <div class="quality-metric-description">Durante ${((qualityAnalysis[predominantQuality].length / totalData) * 100).toFixed(1)}% del vuelo</div>
+        </div>
+    `;
+}
 
 console.log('🚀 GAIA CANSAT Data Analyzer cargado correctamente');

@@ -124,6 +124,40 @@
                 </div>
             </section>
 
+            <!-- Panel de análisis de calidad del aire -->
+            <section class="air-quality-section" id="airQualitySection" style="display: none;">
+                <div class="panel">
+                    <div class="air-quality-header">
+                        <h2 class="panel-title">Análisis de Calidad del Aire</h2>
+                        <button class="air-quality-btn" id="airQualityBtn">Analizar Calidad del Aire</button>
+                    </div>
+                    <div class="air-quality-content" id="airQualityContent" style="display: none;">
+                        <div class="quality-controls">
+                            <div class="control-group">
+                                <label for="altitudeInterval" class="control-label">Intervalo de Altitud:</label>
+                                <select id="altitudeInterval" class="control-select">
+                                    <option value="all">Todas las lecturas</option>
+                                    <option value="5">Promedio cada 5m</option>
+                                    <option value="10">Promedio cada 10m</option>
+                                    <option value="20">Promedio cada 20m</option>
+                                    <option value="30">Promedio cada 30m</option>
+                                </select>
+                            </div>
+                            <button class="update-quality-btn" id="updateQualityBtn">Actualizar Análisis</button>
+                        </div>
+                        <div class="quality-overview" id="qualityOverview">
+                            <!-- Resumen de calidad del aire -->
+                        </div>
+                        <div class="quality-chart-container">
+                            <div id="qualityChart" class="quality-chart"></div>
+                        </div>
+                        <div class="quality-metrics" id="qualityMetrics">
+                            <!-- Métricas detalladas -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Panel de estadísticas -->
             <section class="stats-section" id="statsSection" style="display: none;">
                 <div class="panel">
