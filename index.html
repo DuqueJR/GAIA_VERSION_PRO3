@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAIA CANSAT - Analizador de Datos</title>
+    
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Librerías -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header con logo de la misión -->
+    <header class="header">
+        <div class="container">
+            <div class="mission-header">
+                <div class="mission-logo-container">
+                    <img src="GAIAROCKETS.JPG" alt="GAIA Rockets Logo" class="mission-logo">
+                </div>
+                <div class="mission-info">
+                    <h1 class="mission-title">GAIA ROCKETS</h1>
+                    <p class="mission-lema">"TERRA MATER, STELLAE FUTURAE"</p>
+                    <p class="mission-subtitle">Analizador de Datos de Vuelo CANSAT</p>
+                </div>
+                <div class="team-members">
+                    <div class="members-grid">
+                        <div class="member">
+                            <span class="member-name">ALVAREZ</span>
+                        </div>
+                        <div class="member">
+                            <span class="member-name">CASTAÑEDA</span>
+                        </div>
+                        <div class="member">
+                            <span class="member-name">LONDOÑO</span>
+                        </div>
+                        <div class="member">
+                            <span class="member-name">GIRALDO</span>
+                        </div>
+                        <div class="member">
+                            <span class="member-name">TILANO</span>
+                        </div>
+                        <div class="member">
+                            <span class="member-name">DUQUE</span>
+                        </div>
+                        <div class="member">
+                            <span class="member-name">DUQUE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container">
+            <!-- Panel de carga de archivos -->
+            <section class="upload-section">
+                <div class="panel">
+                    <h2 class="panel-title">Carga de Datos</h2>
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-content">
+                            <div class="upload-icon">📊</div>
+                            <p class="upload-text">Arrastra tu archivo CSV aquí o haz clic para seleccionar</p>
+                            <input type="file" id="csvFile" accept=".csv" class="file-input">
+                            <button class="upload-btn" id="uploadBtn">Seleccionar Archivo</button>
+                        </div>
+                    </div>
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <p class="file-name" id="fileName"></p>
+                        <p class="file-stats" id="fileStats"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de configuración de gráfica -->
+            <section class="chart-section" id="chartSection" style="display: none;">
+                <div class="panel">
+                    <h2 class="panel-title">Configuración de Gráfica</h2>
+                    <div class="chart-controls">
+                        <div class="control-group">
+                            <label for="xAxis" class="control-label">Eje X:</label>
+                            <select id="xAxis" class="control-select">
+                                <option value="">Selecciona una variable...</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="yAxis" class="control-label">Eje Y:</label>
+                            <select id="yAxis" class="control-select">
+                                <option value="">Selecciona una variable...</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label for="chartType" class="control-label">Tipo de Gráfica:</label>
+                            <select id="chartType" class="control-select">
+                                <option value="line">Línea</option>
+                                <option value="scatter">Dispersión</option>
+                                <option value="bar">Barras</option>
+                            </select>
+                        </div>
+                        <button class="generate-btn" id="generateBtn">Generar Gráfica</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de visualización -->
+            <section class="visualization-section" id="visualizationSection" style="display: none;">
+                <div class="panel">
+                    <h2 class="panel-title">Visualización de Datos</h2>
+                    <div class="chart-container">
+                        <div id="chart" class="chart"></div>
+                    </div>
+                    <div class="chart-info" id="chartInfo">
+                        <p class="chart-description" id="chartDescription"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de estadísticas -->
+            <section class="stats-section" id="statsSection" style="display: none;">
+                <div class="panel">
+                    <div class="stats-header">
+                        <h2 class="panel-title">Estadísticas de Datos</h2>
+                        <button class="stats-btn" id="statsBtn">Mostrar Estadísticas</button>
+                    </div>
+                    <div class="stats-content" id="statsContent" style="display: none;">
+                        <div class="stats-grid" id="statsGrid">
+                            <!-- Las estadísticas se generarán dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-text">GAIA Rockets - Misión CANSAT 2024</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
+</html>
