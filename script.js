@@ -13,6 +13,7 @@ let originalData = null;
 let cleanedData = null;
 let currentData = null;
 let isDataCleaned = false;
+let configuredBaseAltitude = 571; // Altura base configurada por el usuario
 
 // Variables esperadas del proyecto CANSAT
 const expectedVariables = [
@@ -105,6 +106,13 @@ function initializeApp() {
     document.getElementById('proceedBtn').addEventListener('click', proceedWithCleanedData);
     document.getElementById('resetBtn').addEventListener('click', resetToOriginalData);
     
+    // Event listeners para configuración de altura base
+    document.getElementById('proceedAltitudeBtn').addEventListener('click', proceedWithConfiguredAltitude);
+    
+    // Event listeners para preview del CSV
+    document.getElementById('proceedPreviewBtn').addEventListener('click', proceedWithPreview);
+    document.getElementById('changeFileBtn').addEventListener('click', changeFile);
+    
     console.log('✅ Aplicación inicializada correctamente');
 }
 
@@ -187,8 +195,8 @@ function processFile(file) {
     originalData = [...results.data];
     currentData = results.data;
     
-            // Mostrar sección de limpieza de datos
-            showDataCleaningSection();
+    // Mostrar preview del CSV
+    showCSVPreview(results.data, results.meta.fields);
         },
         error: function(error) {
             console.error('❌ Error al procesar el CSV:', error);
@@ -467,6 +475,157 @@ function generateChart() {
 }
 
 /**
+ * Muestra el preview del archivo CSV
+ */
+function showCSVPreview(data, headers) {
+    const previewSection = document.getElementById('csvPreviewSection');
+    previewSection.style.display = 'block';
+    previewSection.scrollIntoView({ behavior: 'smooth' });
+    
+    // Mostrar información del archivo
+    displayPreviewInfo(data, headers);
+    
+    // Mostrar tabla de preview
+    displayPreviewTable(data, headers);
+}
+
+/**
+ * Muestra la información del archivo CSV
+ */
+function displayPreviewInfo(data, headers) {
+    const previewInfo = document.getElementById('previewInfo');
+    
+    const infoHTML = `
+        <h3>Información del Archivo</h3>
+        <div class="preview-stats">
+            <div class="preview-stat">
+                <div class="preview-stat-value">${data.length}</div>
+                <div class="preview-stat-label">Filas de Datos</div>
+            </div>
+            <div class="preview-stat">
+                <div class="preview-stat-value">${headers.length}</div>
+                <div class="preview-stat-label">Columnas</div>
+            </div>
+            <div class="preview-stat">
+                <div class="preview-stat-value">${headers.filter(h => expectedVariables.includes(h)).length}</div>
+                <div class="preview-stat-label">Variables CANSAT</div>
+            </div>
+            <div class="preview-stat">
+                <div class="preview-stat-value">${headers.filter(h => !expectedVariables.includes(h)).length}</div>
+                <div class="preview-stat-label">Variables Adicionales</div>
+            </div>
+        </div>
+    `;
+    
+    previewInfo.innerHTML = infoHTML;
+}
+
+/**
+ * Muestra la tabla de preview del CSV
+ */
+function displayPreviewTable(data, headers) {
+    const previewTable = document.getElementById('previewTable');
+    
+    // Mostrar solo las primeras 20 filas para el preview
+    const previewData = data.slice(0, 20);
+    
+    // Crear encabezados de la tabla
+    let tableHTML = '<table class="preview-table"><thead><tr>';
+    headers.forEach(header => {
+        const isExpected = expectedVariables.includes(header);
+        const headerClass = isExpected ? 'expected-column' : 'additional-column';
+        tableHTML += `<th class="${headerClass}">${header}</th>`;
+    });
+    tableHTML += '</tr></thead><tbody>';
+    
+    // Crear filas de datos
+    previewData.forEach((row, index) => {
+        tableHTML += '<tr>';
+        headers.forEach(header => {
+            const value = row[header] || '';
+            const displayValue = typeof value === 'number' ? value.toFixed(2) : value;
+            tableHTML += `<td>${displayValue}</td>`;
+        });
+        tableHTML += '</tr>';
+    });
+    
+    tableHTML += '</tbody></table>';
+    
+    // Agregar nota si hay más datos
+    if (data.length > 20) {
+        tableHTML += `<p style="text-align: center; color: var(--light-gray); margin-top: 15px; font-style: italic;">
+            Mostrando las primeras 20 filas de ${data.length} total
+        </p>`;
+    }
+    
+    previewTable.innerHTML = tableHTML;
+}
+
+/**
+ * Procede con el preview del CSV
+ */
+function proceedWithPreview() {
+    console.log('✅ Continuando con los datos del preview');
+    
+    // Ocultar sección de preview
+    document.getElementById('csvPreviewSection').style.display = 'none';
+    
+    // Mostrar sección de configuración de altura base
+    showAltitudeConfigSection();
+}
+
+/**
+ * Cambia el archivo CSV
+ */
+function changeFile() {
+    console.log('🔄 Cambiando archivo CSV');
+    
+    // Ocultar sección de preview
+    document.getElementById('csvPreviewSection').style.display = 'none';
+    
+    // Limpiar datos anteriores
+    originalData = null;
+    cleanedData = null;
+    currentData = null;
+    csvData = null;
+    csvHeaders = [];
+    isDataCleaned = false;
+    
+    // Mostrar sección de carga de archivos
+    document.getElementById('uploadSection').style.display = 'block';
+    document.getElementById('uploadSection').scrollIntoView({ behavior: 'smooth' });
+    
+    // Limpiar información del archivo
+    document.getElementById('fileName').textContent = '📄 Selecciona un archivo CSV';
+    document.getElementById('fileStats').textContent = '';
+}
+
+/**
+ * Muestra la sección de configuración de altura base
+ */
+function showAltitudeConfigSection() {
+    const altitudeSection = document.getElementById('altitudeConfigSection');
+    altitudeSection.style.display = 'block';
+    altitudeSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Procede con la altura base configurada
+ */
+function proceedWithConfiguredAltitude() {
+    const baseAltitude = parseFloat(document.getElementById('baseAltitude').value) || 571;
+    configuredBaseAltitude = baseAltitude;
+    
+    console.log(`✅ Altura base configurada: ${baseAltitude}m`);
+    
+    // Ocultar sección de configuración de altura
+    document.getElementById('altitudeConfigSection').style.display = 'none';
+    
+    // Mostrar sección de limpieza de datos
+    showDataCleaningSection();
+}
+
+/**
  * Muestra la sección de limpieza de datos
  */
 function showDataCleaningSection() {
@@ -505,9 +664,11 @@ function cleanData() {
         return;
     }
 
-    const baseAltitude = parseFloat(document.getElementById('baseAltitude').value) || 571;
+    const baseAltitude = configuredBaseAltitude; // Usar la altura base configurada
     
-    // Crear una copia de los datos originales
+    console.log(`🧹 Iniciando limpieza con altura base: ${baseAltitude}m`);
+    
+    // Siempre usar los datos originales como base para evitar problemas de ajuste múltiple
     let data = [...originalData];
     const originalCount = data.length;
     
@@ -570,10 +731,14 @@ function cleanData() {
         return true;
     });
     
-    // 3. Ajustar altitud restando la altura base
+    // 3. Ajustar altitud restando la altura base (siempre desde el valor original)
     data.forEach(row => {
         if (row['Altitud_m'] !== undefined && row['Altitud_m'] !== null) {
-            row['Altitud_m'] = parseFloat(row['Altitud_m']) - baseAltitude;
+            // Buscar el valor original de altitud en los datos originales
+            const originalRow = originalData.find(origRow => origRow['Tiempo_ms'] === row['Tiempo_ms']);
+            if (originalRow) {
+                row['Altitud_m'] = parseFloat(originalRow['Altitud_m']) - baseAltitude;
+            }
         }
     });
     
@@ -609,6 +774,14 @@ function displayCleaningSummary(originalCount, cleanedCount, duplicatesRemoved, 
                 <div class="stat-label">Datos Limpios</div>
             </div>
             <div class="summary-stat">
+                <div class="stat-value">${duplicatesRemoved}</div>
+                <div class="stat-label">Duplicados</div>
+            </div>
+            <div class="summary-stat">
+                <div class="stat-value">${outliersRemoved}</div>
+                <div class="stat-label">Valores Fuera de Rango</div>
+            </div>
+            <div class="summary-stat">
                 <div class="stat-value">${originalCount - cleanedCount}</div>
                 <div class="stat-label">Total Eliminados</div>
             </div>
@@ -628,41 +801,41 @@ function displayCleaningSummary(originalCount, cleanedCount, duplicatesRemoved, 
 function displayCleaningDetails(duplicatesRemoved, outliersRemoved, baseAltitude) {
     const detailsContainer = document.getElementById('cleaningDetails');
     
-    // Crear HTML para duplicados
-    let duplicatesHTML = '';
-    if (duplicatesRemoved.length > 0) {
-        duplicatesHTML = `
-            <div class="detail-card duplicates">
-                <div class="detail-card-title">Duplicados Eliminados (${duplicatesRemoved.length})</div>
-                <div class="detail-card-description">Registros con el mismo tiempo (Tiempo_ms)</div>
-                <div class="detail-card-count">${duplicatesRemoved.length}</div>
-                <div class="detail-list">
-                    ${duplicatesRemoved.slice(0, 10).map(dup => 
+    // Crear HTML para duplicados (siempre mostrar, incluso si es 0)
+    const duplicatesHTML = `
+        <div class="detail-card duplicates">
+            <div class="detail-card-title">Duplicados Eliminados (${duplicatesRemoved.length})</div>
+            <div class="detail-card-description">Registros con el mismo tiempo (Tiempo_ms)</div>
+            <div class="detail-card-count">${duplicatesRemoved.length}</div>
+            <div class="detail-list">
+                ${duplicatesRemoved.length > 0 ? 
+                    duplicatesRemoved.slice(0, 10).map(dup => 
                         `<div class="detail-item">Fila ${dup.index}: Tiempo ${dup.time}ms - ${dup.reason}</div>`
-                    ).join('')}
-                    ${duplicatesRemoved.length > 10 ? `<div class="detail-item">... y ${duplicatesRemoved.length - 10} más</div>` : ''}
-                </div>
+                    ).join('') + 
+                    (duplicatesRemoved.length > 10 ? `<div class="detail-item">... y ${duplicatesRemoved.length - 10} más</div>` : '') :
+                    '<div class="detail-item">No se encontraron duplicados</div>'
+                }
             </div>
-        `;
-    }
+        </div>
+    `;
     
-    // Crear HTML para valores fuera de rango
-    let outliersHTML = '';
-    if (outliersRemoved.length > 0) {
-        outliersHTML = `
-            <div class="detail-card outliers">
-                <div class="detail-card-title">Valores Fuera de Rango (${outliersRemoved.length})</div>
-                <div class="detail-card-description">Datos que exceden límites físicos realistas</div>
-                <div class="detail-card-count">${outliersRemoved.length}</div>
-                <div class="detail-list">
-                    ${outliersRemoved.slice(0, 10).map(outlier => 
+    // Crear HTML para valores fuera de rango (siempre mostrar, incluso si es 0)
+    const outliersHTML = `
+        <div class="detail-card outliers">
+            <div class="detail-card-title">Valores Fuera de Rango (${outliersRemoved.length})</div>
+            <div class="detail-card-description">Datos que exceden límites físicos realistas</div>
+            <div class="detail-card-count">${outliersRemoved.length}</div>
+            <div class="detail-list">
+                ${outliersRemoved.length > 0 ? 
+                    outliersRemoved.slice(0, 10).map(outlier => 
                         `<div class="detail-item">Fila ${outlier.index}: ${outlier.column} = ${outlier.value} - ${outlier.reason}</div>`
-                    ).join('')}
-                    ${outliersRemoved.length > 10 ? `<div class="detail-item">... y ${outliersRemoved.length - 10} más</div>` : ''}
-                </div>
+                    ).join('') + 
+                    (outliersRemoved.length > 10 ? `<div class="detail-item">... y ${outliersRemoved.length - 10} más</div>` : '') :
+                    '<div class="detail-item">No se encontraron valores fuera de rango</div>'
+                }
             </div>
-        `;
-    }
+        </div>
+    `;
     
     const detailsHTML = `
         <div class="details-title">Detalles de Limpieza</div>

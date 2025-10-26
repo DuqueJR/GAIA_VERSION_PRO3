@@ -355,6 +355,258 @@ body {
     font-style: italic;
 }
 
+/* Preview del CSV */
+.preview-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.preview-description {
+    color: var(--light-gray);
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.preview-content {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.preview-info {
+    background: var(--medium-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--neon-green);
+    margin-bottom: 20px;
+}
+
+.preview-info h3 {
+    color: var(--neon-green);
+    font-family: var(--font-orbitron);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.preview-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.preview-stat {
+    text-align: center;
+    padding: 10px;
+    background: var(--primary-black);
+    border-radius: var(--border-radius);
+}
+
+.preview-stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 5px;
+}
+
+.preview-stat-label {
+    font-size: 0.8rem;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.preview-table-container {
+    background: var(--primary-black);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid var(--medium-gray);
+    max-height: 400px;
+    overflow: auto;
+}
+
+.preview-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+}
+
+.preview-table th {
+    background: var(--medium-gray);
+    color: var(--neon-green);
+    padding: 10px 8px;
+    text-align: left;
+    font-family: var(--font-orbitron);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--neon-green);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.preview-table th.expected-column {
+    background: var(--medium-gray);
+    color: var(--neon-green);
+    border-bottom: 2px solid var(--neon-green);
+}
+
+.preview-table th.additional-column {
+    background: var(--secondary-black);
+    color: var(--space-blue);
+    border-bottom: 2px solid var(--space-blue);
+}
+
+.preview-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--white);
+    font-family: var(--font-roboto);
+}
+
+.preview-table tr:hover {
+    background: rgba(0, 255, 136, 0.1);
+}
+
+.preview-table tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.preview-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.proceed-preview-btn {
+    background: linear-gradient(45deg, var(--neon-green), #00cc66);
+    color: var(--primary-black);
+    border: none;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.proceed-preview-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+}
+
+.change-file-btn {
+    background: linear-gradient(45deg, var(--space-blue), #0066cc);
+    color: var(--white);
+    border: none;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.change-file-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.3);
+}
+
+/* Configuración de Altura Base */
+.altitude-config-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.altitude-description {
+    color: var(--light-gray);
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.altitude-config-content {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.altitude-controls {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.altitude-info {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.info-card {
+    background: var(--medium-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--space-blue);
+}
+
+.info-card h3 {
+    color: var(--neon-green);
+    font-family: var(--font-orbitron);
+    font-size: 1rem;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.info-card p {
+    color: var(--light-gray);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.info-card ul {
+    color: var(--light-gray);
+    font-size: 0.9rem;
+    margin: 0;
+    padding-left: 20px;
+}
+
+.info-card li {
+    margin-bottom: 5px;
+}
+
+.altitude-actions {
+    display: flex;
+    justify-content: center;
+}
+
+.proceed-altitude-btn {
+    background: linear-gradient(45deg, var(--neon-green), #00cc66);
+    color: var(--primary-black);
+    border: none;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.proceed-altitude-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+}
+
 /* Limpieza de Datos */
 .cleaning-header {
     display: flex;
@@ -420,6 +672,28 @@ body {
     color: var(--light-gray);
     margin-top: 5px;
     font-style: italic;
+}
+
+.update-altitude-btn {
+    background: linear-gradient(45deg, var(--space-blue), #0066cc);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+    width: 100%;
+}
+
+.update-altitude-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(0, 136, 255, 0.3);
 }
 
 .cleaning-summary {

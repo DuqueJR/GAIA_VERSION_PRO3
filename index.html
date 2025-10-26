@@ -81,6 +81,67 @@
                 </div>
             </section>
 
+            <!-- Panel de preview del CSV -->
+            <section class="csv-preview-section" id="csvPreviewSection" style="display: none;">
+                <div class="panel">
+                    <div class="preview-header">
+                        <h2 class="panel-title">Vista Previa del Archivo CSV</h2>
+                        <p class="preview-description">Revisa los datos cargados antes de continuar</p>
+                    </div>
+                    <div class="preview-content">
+                        <div class="preview-info" id="previewInfo">
+                            <!-- Información del archivo -->
+                        </div>
+                        <div class="preview-table-container">
+                            <div class="preview-table" id="previewTable">
+                                <!-- Tabla de preview -->
+                            </div>
+                        </div>
+                        <div class="preview-actions">
+                            <button class="proceed-preview-btn" id="proceedPreviewBtn">Continuar con estos Datos</button>
+                            <button class="change-file-btn" id="changeFileBtn">Cambiar Archivo</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Panel de configuración de altura base -->
+            <section class="altitude-config-section" id="altitudeConfigSection" style="display: none;">
+                <div class="panel">
+                    <div class="altitude-config-header">
+                        <h2 class="panel-title">Configuración de Altura Base</h2>
+                        <p class="altitude-description">Configure la altura de referencia antes de procesar los datos</p>
+                    </div>
+                    <div class="altitude-config-content">
+                        <div class="altitude-controls">
+                            <div class="control-group">
+                                <label for="baseAltitude" class="control-label">Altura Base (m):</label>
+                                <input type="number" id="baseAltitude" class="control-input" value="571" min="0" max="10000" step="1">
+                                <p class="control-description">Altura de referencia para ajustar la altitud registrada (ej: altura del lugar de lanzamiento)</p>
+                            </div>
+                            <div class="altitude-info">
+                                <div class="info-card">
+                                    <h3>¿Qué es la altura base?</h3>
+                                    <p>Es la altura del lugar de lanzamiento sobre el nivel del mar. Se resta de todas las altitudes registradas para obtener la altura relativa del CANSAT.</p>
+                                </div>
+                                <div class="info-card">
+                                    <h3>Ejemplos comunes:</h3>
+                                    <ul>
+                                        <li>Santa Fe de Antioquia: ~571m</li>
+                                        <li>Bogotá: ~2640m</li>
+                                        <li>Medellín: ~1500m</li>
+                                        <li>Nivel del mar: 0m</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="altitude-actions">
+                            <button class="proceed-altitude-btn" id="proceedAltitudeBtn">Continuar con esta Altura</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Panel de limpieza de datos -->
             <section class="data-cleaning-section" id="dataCleaningSection" style="display: none;">
                 <div class="panel">
@@ -90,11 +151,6 @@
                     </div>
                     <div class="cleaning-content" id="cleaningContent" style="display: none;">
                         <div class="cleaning-controls">
-                            <div class="control-group">
-                                <label for="baseAltitude" class="control-label">Altura Base (m):</label>
-                                <input type="number" id="baseAltitude" class="control-input" value="571" min="0" max="10000" step="1">
-                                <p class="control-description">Altura de referencia para ajustar la altitud registrada</p>
-                            </div>
                             <div class="cleaning-summary" id="cleaningSummary">
                                 <!-- Resumen de limpieza -->
                             </div>
