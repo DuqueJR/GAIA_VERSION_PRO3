@@ -1274,6 +1274,152 @@ body {
     animation: fadeIn 0.6s ease-out;
 }
 
+/* Análisis de Apogeo */
+.apogee-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.apogee-btn {
+    background: linear-gradient(45deg, var(--neon-green), #00cc66);
+    color: var(--primary-black);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.apogee-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+}
+
+.apogee-btn.active {
+    background: linear-gradient(45deg, #00cc66, var(--neon-green));
+}
+
+.apogee-content {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.apogee-overview {
+    background: var(--medium-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--neon-green);
+    margin-bottom: 30px;
+}
+
+.apogee-overview h3 {
+    font-family: var(--font-orbitron);
+    font-size: 1.1rem;
+    color: var(--neon-green);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.apogee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.apogee-card {
+    background: var(--primary-black);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    text-align: center;
+    border: 2px solid rgba(0, 255, 136, 0.2);
+    transition: var(--transition);
+}
+
+.apogee-card:hover {
+    border-color: var(--neon-green);
+    transform: translateY(-5px);
+    box-shadow: var(--glow);
+}
+
+.apogee-card-title {
+    font-size: 0.8rem;
+    color: var(--light-gray);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.apogee-card-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--neon-green);
+    font-family: var(--font-orbitron);
+}
+
+.apogee-card-unit {
+    font-size: 0.9rem;
+    color: var(--light-gray);
+    margin-left: 5px;
+}
+
+.apogee-details {
+    background: var(--medium-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--neon-green);
+}
+
+.apogee-details h3 {
+    font-family: var(--font-orbitron);
+    font-size: 1rem;
+    color: var(--neon-green);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.apogee-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.apogee-metric {
+    background: var(--primary-black);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--space-blue);
+    transition: var(--transition);
+}
+
+.apogee-metric:hover {
+    border-left-color: var(--neon-green);
+    transform: translateX(5px);
+}
+
+.apogee-metric-label {
+    font-size: 0.8rem;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 5px;
+}
+
+.apogee-metric-value {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--white);
+    font-family: var(--font-orbitron);
+}
+
 /* Scrollbar personalizado */
 ::-webkit-scrollbar {
     width: 8px;

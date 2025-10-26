@@ -98,6 +98,9 @@ function initializeApp() {
     // Event listener para análisis de calidad del aire
     document.getElementById('airQualityBtn').addEventListener('click', toggleAirQualityAnalysis);
     
+    // Event listener para análisis de apogeo
+    document.getElementById('apogeeBtn').addEventListener('click', toggleApogeeAnalysis);
+    
     // Event listener para actualizar análisis de calidad del aire
     document.getElementById('updateQualityBtn').addEventListener('click', updateAirQualityAnalysis);
     
@@ -874,6 +877,7 @@ function proceedWithCleanedData() {
     showChartSection();
     showStatsSection();
     showAirQualitySection();
+    showApogeeSection();
     
     // Actualizar dropdowns
     updateColumnDropdowns();
@@ -902,6 +906,7 @@ function resetToOriginalData() {
     showChartSection();
     showStatsSection();
     showAirQualitySection();
+    showApogeeSection();
     
     // Actualizar dropdowns
     updateColumnDropdowns();
@@ -935,6 +940,175 @@ function showStatsSection() {
  */
 function showAirQualitySection() {
     document.getElementById('airQualitySection').style.display = 'block';
+}
+
+/**
+ * Muestra la sección de análisis de apogeo
+ */
+function showApogeeSection() {
+    document.getElementById('apogeeSection').style.display = 'block';
+}
+
+/**
+ * Alterna la visualización del análisis de apogeo
+ */
+function toggleApogeeAnalysis() {
+    const apogeeContent = document.getElementById('apogeeContent');
+    const apogeeBtn = document.getElementById('apogeeBtn');
+    
+    if (apogeeContent.style.display === 'none' || apogeeContent.style.display === '') {
+        apogeeContent.style.display = 'block';
+        apogeeBtn.classList.add('active');
+        apogeeBtn.textContent = 'Ocultar Análisis de Apogeo';
+        
+        // Ejecutar análisis automáticamente
+        analyzeApogee();
+    } else {
+        apogeeContent.style.display = 'none';
+        apogeeBtn.classList.remove('active');
+        apogeeBtn.textContent = 'Analizar Apogeo';
+    }
+}
+
+/**
+ * Analiza el apogeo del vuelo CANSAT
+ */
+function analyzeApogee() {
+    if (!csvData || csvData.length === 0) {
+        alert('No hay datos disponibles para analizar el apogeo');
+        return;
+    }
+
+    if (!csvHeaders.includes('Altitud_m') || !csvHeaders.includes('Tiempo_ms')) {
+        alert('El archivo debe contener columnas de Altitud_m y Tiempo_ms para analizar el apogeo');
+        return;
+    }
+
+    // Encontrar el apogeo (altitud máxima)
+    let maxAltitude = -Infinity;
+    let apogeeIndex = 0;
+    let apogeeTime = 0;
+    
+    csvData.forEach((row, index) => {
+        if (row['Altitud_m'] !== undefined && row['Altitud_m'] !== null) {
+            const altitude = parseFloat(row['Altitud_m']);
+            if (!isNaN(altitude) && altitude > maxAltitude) {
+                maxAltitude = altitude;
+                apogeeIndex = index;
+                apogeeTime = parseFloat(row['Tiempo_ms']) || 0;
+            }
+        }
+    });
+
+    // Obtener todos los datos en el momento del apogeo
+    const apogeeRow = csvData[apogeeIndex];
+    
+    // Mostrar resumen
+    displayApogeeOverview(maxAltitude, apogeeTime, apogeeIndex);
+    
+    // Mostrar detalles con todas las métricas
+    displayApogeeDetails(apogeeRow, maxAltitude, apogeeTime);
+}
+
+/**
+ * Muestra el resumen del apogeo
+ */
+function displayApogeeOverview(maxAltitude, apogeeTime, apogeeIndex) {
+    const overviewContainer = document.getElementById('apogeeOverview');
+    
+    const overviewHTML = `
+        <h3>Resumen del Apogeo</h3>
+        <div class="apogee-grid">
+            <div class="apogee-card">
+                <div class="apogee-card-title">Altura del Apogeo</div>
+                <div class="apogee-card-value">${maxAltitude.toFixed(2)}<span class="apogee-card-unit">m</span></div>
+            </div>
+            <div class="apogee-card">
+                <div class="apogee-card-title">Tiempo al Apogeo</div>
+                <div class="apogee-card-value">${(apogeeTime / 1000).toFixed(2)}<span class="apogee-card-unit">s</span></div>
+            </div>
+            <div class="apogee-card">
+                <div class="apogee-card-title">Índice de Dato</div>
+                <div class="apogee-card-value">${apogeeIndex}<span class="apogee-card-unit"></span></div>
+            </div>
+        </div>
+    `;
+    
+    overviewContainer.innerHTML = overviewHTML;
+}
+
+/**
+ * Muestra los detalles con todas las métricas del punto de apogeo
+ */
+function displayApogeeDetails(apogeeRow, maxAltitude, apogeeTime) {
+    const detailsContainer = document.getElementById('apogeeDetails');
+    
+    // Obtener todas las métricas del punto de apogeo
+    const metrics = [];
+    
+    expectedVariables.forEach(varName => {
+        if (apogeeRow[varName] !== undefined && apogeeRow[varName] !== null) {
+            const value = parseFloat(apogeeRow[varName]);
+            if (!isNaN(value)) {
+                const unit = getUnitForVariable(varName);
+                metrics.push({
+                    label: varName,
+                    value: value,
+                    unit: unit
+                });
+            }
+        }
+    });
+    
+    // Crear HTML para las métricas
+    const metricsHTML = metrics.map(metric => `
+        <div class="apogee-metric">
+            <div class="apogee-metric-label">${metric.label}</div>
+            <div class="apogee-metric-value">${formatValue(metric.value, metric.unit)}</div>
+        </div>
+    `).join('');
+    
+    const detailsHTML = `
+        <h3>Métricas en el Punto de Apogeo</h3>
+        <div class="apogee-metrics">
+            ${metricsHTML}
+        </div>
+    `;
+    
+    detailsContainer.innerHTML = detailsHTML;
+}
+
+/**
+ * Obtiene la unidad para una variable
+ */
+function getUnitForVariable(varName) {
+    const units = {
+        'Tiempo_ms': 'ms',
+        'Temperatura_C': '°C',
+        'Humedad_%': '%',
+        'Presion_hPa': 'hPa',
+        'Resistencia_kOhms': 'kΩ',
+        'Accel_X_m_s2': 'm/s²',
+        'Accel_Y_m_s2': 'm/s²',
+        'Accel_Z_m_s2': 'm/s²',
+        'Gyro_X_deg_s': 'deg/s',
+        'Gyro_Y_deg_s': 'deg/s',
+        'Gyro_Z_deg_s': 'deg/s',
+        'Roll_deg': '°',
+        'Pitch_deg': '°',
+        'Altitud_m': 'm'
+    };
+    return units[varName] || '';
+}
+
+/**
+ * Formatea un valor con su unidad
+ */
+function formatValue(value, unit) {
+    if (unit === '') {
+        return value.toFixed(2);
+    }
+    return `${value.toFixed(2)} ${unit}`;
 }
 
 /**
