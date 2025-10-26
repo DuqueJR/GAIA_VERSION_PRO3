@@ -8,6 +8,12 @@ let csvData = null;
 let csvHeaders = [];
 let currentChart = null;
 
+// Variables para limpieza de datos
+let originalData = null;
+let cleanedData = null;
+let currentData = null;
+let isDataCleaned = false;
+
 // Variables esperadas del proyecto CANSAT
 const expectedVariables = [
     "Tiempo_ms",
@@ -94,6 +100,11 @@ function initializeApp() {
     // Event listener para actualizar análisis de calidad del aire
     document.getElementById('updateQualityBtn').addEventListener('click', updateAirQualityAnalysis);
     
+    // Event listeners para limpieza de datos
+    document.getElementById('cleanDataBtn').addEventListener('click', toggleDataCleaning);
+    document.getElementById('proceedBtn').addEventListener('click', proceedWithCleanedData);
+    document.getElementById('resetBtn').addEventListener('click', resetToOriginalData);
+    
     console.log('✅ Aplicación inicializada correctamente');
 }
 
@@ -172,14 +183,12 @@ function processFile(file) {
             // Configurar los selects con las columnas disponibles
             populateAxisSelects();
             
-            // Mostrar secciones adicionales
-            showChartSection();
-            showStatsSection();
-            
-            // Mostrar sección de calidad del aire si está disponible
-            if (csvHeaders.includes('Resistencia_kOhms')) {
-                showAirQualitySection();
-            }
+    // Guardar datos originales para limpieza
+    originalData = [...results.data];
+    currentData = results.data;
+    
+            // Mostrar sección de limpieza de datos
+            showDataCleaningSection();
         },
         error: function(error) {
             console.error('❌ Error al procesar el CSV:', error);
@@ -458,6 +467,276 @@ function generateChart() {
 }
 
 /**
+ * Muestra la sección de limpieza de datos
+ */
+function showDataCleaningSection() {
+    const cleaningSection = document.getElementById('dataCleaningSection');
+    cleaningSection.style.display = 'block';
+    cleaningSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+/**
+ * Alterna la visualización del panel de limpieza de datos
+ */
+function toggleDataCleaning() {
+    const cleaningContent = document.getElementById('cleaningContent');
+    const cleanBtn = document.getElementById('cleanDataBtn');
+    
+    if (cleaningContent.style.display === 'none' || cleaningContent.style.display === '') {
+        cleaningContent.style.display = 'block';
+        cleanBtn.classList.add('active');
+        cleanBtn.textContent = 'Ocultar Limpieza';
+        
+        // Ejecutar limpieza automáticamente
+        cleanData();
+    } else {
+        cleaningContent.style.display = 'none';
+        cleanBtn.classList.remove('active');
+        cleanBtn.textContent = 'Limpiar Datos';
+    }
+}
+
+/**
+ * Realiza la limpieza de datos según los criterios especificados
+ */
+function cleanData() {
+    if (!originalData) {
+        alert('No hay datos para limpiar');
+        return;
+    }
+
+    const baseAltitude = parseFloat(document.getElementById('baseAltitude').value) || 571;
+    
+    // Crear una copia de los datos originales
+    let data = [...originalData];
+    const originalCount = data.length;
+    
+    // Arrays para almacenar detalles de eliminación
+    const duplicateDetails = [];
+    const outlierDetails = [];
+    
+    // 1. Eliminar duplicados por tiempo (mantener el primero)
+    const timeMap = new Map();
+    const duplicatesRemoved = [];
+    
+    data = data.filter((row, index) => {
+        const time = row['Tiempo_ms'];
+        if (timeMap.has(time)) {
+            duplicatesRemoved.push({
+                index: index,
+                time: time,
+                reason: 'Duplicado de tiempo'
+            });
+            return false; // Duplicado, eliminar
+        }
+        timeMap.set(time, true);
+        return true;
+    });
+    
+    // 2. Filtrar por rangos físicos
+    const physicalRanges = {
+        'Temperatura_C': [-50, 85],
+        'Presion_hPa': [300, 1100],
+        'Humedad_%': [0, 100],
+        'Accel_X_m_s2': [-160, 160],
+        'Accel_Y_m_s2': [-160, 160],
+        'Accel_Z_m_s2': [-160, 160],
+        'Gyro_X_deg_s': [-2000, 2000],
+        'Gyro_Y_deg_s': [-2000, 2000],
+        'Gyro_Z_deg_s': [-2000, 2000],
+        'Altitud_m': [-500, 100000]
+    };
+    
+    let outliersRemoved = [];
+    data = data.filter((row, index) => {
+        for (const [column, range] of Object.entries(physicalRanges)) {
+            if (row[column] !== undefined && row[column] !== null) {
+                const value = parseFloat(row[column]);
+                if (isNaN(value) || value < range[0] || value > range[1]) {
+                    outliersRemoved.push({
+                        index: index,
+                        column: column,
+                        value: value,
+                        minRange: range[0],
+                        maxRange: range[1],
+                        reason: isNaN(value) ? 'Valor no numérico' : 
+                               (value < range[0] ? `Valor muy bajo (${value} < ${range[0]})` : 
+                                `Valor muy alto (${value} > ${range[1]})`)
+                    });
+                    return false;
+                }
+            }
+        }
+        return true;
+    });
+    
+    // 3. Ajustar altitud restando la altura base
+    data.forEach(row => {
+        if (row['Altitud_m'] !== undefined && row['Altitud_m'] !== null) {
+            row['Altitud_m'] = parseFloat(row['Altitud_m']) - baseAltitude;
+        }
+    });
+    
+    const cleanedCount = data.length;
+    const totalRemoved = originalCount - cleanedCount;
+    
+    // Guardar datos limpios
+    cleanedData = data;
+    isDataCleaned = true;
+    
+    // Mostrar resumen de limpieza
+    displayCleaningSummary(originalCount, cleanedCount, duplicatesRemoved.length, outliersRemoved.length, baseAltitude);
+    
+    // Mostrar detalles de limpieza
+    displayCleaningDetails(duplicatesRemoved, outliersRemoved, baseAltitude);
+}
+
+/**
+ * Muestra el resumen de limpieza de datos
+ */
+function displayCleaningSummary(originalCount, cleanedCount, duplicatesRemoved, outliersRemoved, baseAltitude) {
+    const summaryContainer = document.getElementById('cleaningSummary');
+    
+    const summaryHTML = `
+        <div class="summary-title">Resumen de Limpieza</div>
+        <div class="summary-stats">
+            <div class="summary-stat">
+                <div class="stat-value">${originalCount}</div>
+                <div class="stat-label">Datos Originales</div>
+            </div>
+            <div class="summary-stat">
+                <div class="stat-value">${cleanedCount}</div>
+                <div class="stat-label">Datos Limpios</div>
+            </div>
+            <div class="summary-stat">
+                <div class="stat-value">${originalCount - cleanedCount}</div>
+                <div class="stat-label">Total Eliminados</div>
+            </div>
+            <div class="summary-stat">
+                <div class="stat-value">${((cleanedCount / originalCount) * 100).toFixed(1)}%</div>
+                <div class="stat-label">Datos Válidos</div>
+            </div>
+        </div>
+    `;
+    
+    summaryContainer.innerHTML = summaryHTML;
+}
+
+/**
+ * Muestra los detalles de qué datos fueron eliminados
+ */
+function displayCleaningDetails(duplicatesRemoved, outliersRemoved, baseAltitude) {
+    const detailsContainer = document.getElementById('cleaningDetails');
+    
+    // Crear HTML para duplicados
+    let duplicatesHTML = '';
+    if (duplicatesRemoved.length > 0) {
+        duplicatesHTML = `
+            <div class="detail-card duplicates">
+                <div class="detail-card-title">Duplicados Eliminados (${duplicatesRemoved.length})</div>
+                <div class="detail-card-description">Registros con el mismo tiempo (Tiempo_ms)</div>
+                <div class="detail-card-count">${duplicatesRemoved.length}</div>
+                <div class="detail-list">
+                    ${duplicatesRemoved.slice(0, 10).map(dup => 
+                        `<div class="detail-item">Fila ${dup.index}: Tiempo ${dup.time}ms - ${dup.reason}</div>`
+                    ).join('')}
+                    ${duplicatesRemoved.length > 10 ? `<div class="detail-item">... y ${duplicatesRemoved.length - 10} más</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    // Crear HTML para valores fuera de rango
+    let outliersHTML = '';
+    if (outliersRemoved.length > 0) {
+        outliersHTML = `
+            <div class="detail-card outliers">
+                <div class="detail-card-title">Valores Fuera de Rango (${outliersRemoved.length})</div>
+                <div class="detail-card-description">Datos que exceden límites físicos realistas</div>
+                <div class="detail-card-count">${outliersRemoved.length}</div>
+                <div class="detail-list">
+                    ${outliersRemoved.slice(0, 10).map(outlier => 
+                        `<div class="detail-item">Fila ${outlier.index}: ${outlier.column} = ${outlier.value} - ${outlier.reason}</div>`
+                    ).join('')}
+                    ${outliersRemoved.length > 10 ? `<div class="detail-item">... y ${outliersRemoved.length - 10} más</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+    
+    const detailsHTML = `
+        <div class="details-title">Detalles de Limpieza</div>
+        <div class="details-grid">
+            ${duplicatesHTML}
+            ${outliersHTML}
+            <div class="detail-card adjusted">
+                <div class="detail-card-title">Altitud Ajustada</div>
+                <div class="detail-card-description">Altura base restada: ${baseAltitude}m</div>
+                <div class="detail-card-count">✓</div>
+                <div class="detail-item">Todas las alturas ajustadas correctamente</div>
+            </div>
+        </div>
+    `;
+    
+    detailsContainer.innerHTML = detailsHTML;
+}
+
+/**
+ * Procede con los datos limpios para el análisis
+ */
+function proceedWithCleanedData() {
+    if (!cleanedData) {
+        alert('No hay datos limpios disponibles');
+        return;
+    }
+    
+    // Usar los datos limpios
+    currentData = cleanedData;
+    csvData = cleanedData;
+    
+    // Ocultar sección de limpieza
+    document.getElementById('dataCleaningSection').style.display = 'none';
+    
+    // Mostrar secciones de análisis
+    showChartSection();
+    showStatsSection();
+    showAirQualitySection();
+    
+    // Actualizar dropdowns
+    updateColumnDropdowns();
+    
+    alert('Datos limpios cargados exitosamente. Puede proceder con el análisis.');
+}
+
+/**
+ * Resetea a los datos originales
+ */
+function resetToOriginalData() {
+    if (!originalData) {
+        alert('No hay datos originales disponibles');
+        return;
+    }
+    
+    // Usar los datos originales
+    currentData = originalData;
+    csvData = originalData;
+    isDataCleaned = false;
+    
+    // Ocultar sección de limpieza
+    document.getElementById('dataCleaningSection').style.display = 'none';
+    
+    // Mostrar secciones de análisis
+    showChartSection();
+    showStatsSection();
+    showAirQualitySection();
+    
+    // Actualizar dropdowns
+    updateColumnDropdowns();
+    
+    alert('Datos originales restaurados. Puede proceder con el análisis.');
+}
+
+/**
  * Muestra la sección de configuración de gráfica
  */
 function showChartSection() {
@@ -600,7 +879,7 @@ window.GAIACANSAT = {
 // Métricas de calidad del aire basadas en resistencia de gases
 const airQualityMetrics = {
     excellent: { min: 300, max: Infinity, label: 'Excelente', color: '#00ff88' },
-    good: { min: 200, max: 300, label: 'Buena', color: '#33ff99' },
+    good: { min: 200, max: 300, label: 'Buena', color: '#00ccff' },
     moderate: { min: 100, max: 200, label: 'Moderada', color: '#ffaa00' },
     poor: { min: 50, max: 100, label: 'Mala', color: '#ff6600' },
     veryPoor: { min: 0, max: 50, label: 'Muy mala', color: '#ff0000' }
@@ -750,7 +1029,7 @@ function generateQualityChart(resistanceData) {
     // Crear colores individuales para cada punto según su calidad
     const colors = processedData.map(point => {
         if (point.resistance >= 300) return '#00ff88';      // Excelente - Verde neón brillante
-        if (point.resistance >= 200) return '#33ff99';      // Buena - Verde claro más distinguible
+        if (point.resistance >= 200) return '#00ccff';      // Buena - Azul cian muy distinguible
         if (point.resistance >= 100) return '#ffaa00';     // Moderada - Naranja
         if (point.resistance >= 50) return '#ff6600';       // Mala - Naranja oscuro
         return '#ff0000';                                    // Muy mala - Rojo
@@ -854,7 +1133,7 @@ function generateQualityChart(resistanceData) {
                 y: 0.98,
                 xref: 'paper',
                 yref: 'paper',
-                text: '🟢 Excelente (>300kΩ) 🟢 Buena (200-300kΩ) 🟠 Moderada (100-200kΩ) 🔶 Mala (50-100kΩ) 🔴 Muy mala (<50kΩ)',
+                text: '🟢 Excelente (>300kΩ) 🔵 Buena (200-300kΩ) 🟠 Moderada (100-200kΩ) 🔶 Mala (50-100kΩ) 🔴 Muy mala (<50kΩ)',
                 showarrow: false,
                 font: { color: '#ffffff', size: 10 },
                 bgcolor: 'rgba(0,0,0,0.7)',

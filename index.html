@@ -81,6 +81,35 @@
                 </div>
             </section>
 
+            <!-- Panel de limpieza de datos -->
+            <section class="data-cleaning-section" id="dataCleaningSection" style="display: none;">
+                <div class="panel">
+                    <div class="cleaning-header">
+                        <h2 class="panel-title">Limpieza de Datos</h2>
+                        <button class="clean-data-btn" id="cleanDataBtn">Limpiar Datos</button>
+                    </div>
+                    <div class="cleaning-content" id="cleaningContent" style="display: none;">
+                        <div class="cleaning-controls">
+                            <div class="control-group">
+                                <label for="baseAltitude" class="control-label">Altura Base (m):</label>
+                                <input type="number" id="baseAltitude" class="control-input" value="571" min="0" max="10000" step="1">
+                                <p class="control-description">Altura de referencia para ajustar la altitud registrada</p>
+                            </div>
+                            <div class="cleaning-summary" id="cleaningSummary">
+                                <!-- Resumen de limpieza -->
+                            </div>
+                        </div>
+                        <div class="cleaning-details" id="cleaningDetails">
+                            <!-- Detalles de datos eliminados -->
+                        </div>
+                        <div class="cleaning-actions">
+                            <button class="proceed-btn" id="proceedBtn">Proceder con Datos Limpios</button>
+                            <button class="reset-btn" id="resetBtn">Usar Datos Originales</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Panel de configuración de gráfica -->
             <section class="chart-section" id="chartSection" style="display: none;">
                 <div class="panel">

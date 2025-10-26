@@ -355,6 +355,245 @@ body {
     font-style: italic;
 }
 
+/* Limpieza de Datos */
+.cleaning-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.clean-data-btn {
+    background: linear-gradient(45deg, var(--neon-green), #00cc66);
+    color: var(--primary-black);
+    border: none;
+    padding: 10px 20px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.clean-data-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+}
+
+.clean-data-btn.active {
+    background: linear-gradient(45deg, #00cc66, var(--neon-green));
+}
+
+.cleaning-content {
+    animation: fadeIn 0.5s ease-out;
+}
+
+.cleaning-controls {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.control-input {
+    background: var(--medium-gray);
+    color: var(--white);
+    border: 1px solid var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    font-size: 1rem;
+    transition: var(--transition);
+    width: 100%;
+}
+
+.control-input:focus {
+    outline: none;
+    border-color: var(--neon-green);
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+}
+
+.control-description {
+    font-size: 0.8rem;
+    color: var(--light-gray);
+    margin-top: 5px;
+    font-style: italic;
+}
+
+.cleaning-summary {
+    background: var(--medium-gray);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--neon-green);
+}
+
+.summary-title {
+    font-family: var(--font-orbitron);
+    font-size: 1.1rem;
+    color: var(--neon-green);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+}
+
+.summary-stat {
+    text-align: center;
+    padding: 10px;
+    background: var(--primary-black);
+    border-radius: var(--border-radius);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 5px;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--light-gray);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.cleaning-details {
+    margin-bottom: 30px;
+}
+
+.details-title {
+    font-family: var(--font-orbitron);
+    font-size: 1rem;
+    color: var(--neon-green);
+    margin-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.detail-card {
+    background: var(--medium-gray);
+    padding: 15px;
+    border-radius: var(--border-radius);
+    border-left: 4px solid;
+}
+
+.detail-card.duplicates {
+    border-left-color: #ffaa00;
+}
+
+.detail-card.outliers {
+    border-left-color: #ff6600;
+}
+
+.detail-card.adjusted {
+    border-left-color: var(--space-blue);
+}
+
+.detail-card-title {
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: 8px;
+}
+
+.detail-card-description {
+    font-size: 0.9rem;
+    color: var(--light-gray);
+    margin-bottom: 5px;
+}
+
+.detail-card-count {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--neon-green);
+}
+
+.detail-list {
+    margin-top: 10px;
+    max-height: 200px;
+    overflow-y: auto;
+    background: var(--primary-black);
+    border-radius: var(--border-radius);
+    padding: 10px;
+}
+
+.detail-item {
+    font-size: 0.8rem;
+    color: var(--light-gray);
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-item:hover {
+    color: var(--white);
+    background: rgba(0, 255, 136, 0.1);
+    border-radius: 3px;
+    padding: 3px 5px;
+}
+
+.cleaning-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.proceed-btn {
+    background: linear-gradient(45deg, var(--neon-green), #00cc66);
+    color: var(--primary-black);
+    border: none;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.proceed-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glow);
+}
+
+.reset-btn {
+    background: linear-gradient(45deg, var(--space-blue), #0066cc);
+    color: var(--white);
+    border: none;
+    padding: 15px 30px;
+    border-radius: var(--border-radius);
+    font-family: var(--font-orbitron);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.reset-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 20px rgba(0, 136, 255, 0.3);
+}
+
 /* Análisis de Calidad del Aire */
 .air-quality-header {
     display: flex;
